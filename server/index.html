@@ -6,44 +6,116 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
-    <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font: 13px Helvetica, Arial; }
-      .form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-      .form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
-      .form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages li { padding: 5px 10px; }
-      #messages li:nth-child(odd) { background: #eee; }
-    </style>
+    <link rel="stylesheet" href="css/main.css">
   </head>
   <body>
     <!-- 消息列表 -->
     <ul id="messages"></ul>
     <!-- 推送消息 -->
     <div class="form">
+      <i class="myName"></i>
       <input id="msg"  autocomplete="off" /><button id="send">Send</button>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+    <div class="inputName" style="display: none">
+      <div class="msg-layer-bg"></div>
+      <div class="msg-layer showAlert">
+        <h5>加入聊天室</h5>
+        <div class="msg-con">
+          <input type="text" placeholder="请输入您的昵称" class="nickName">
+        </div>
+        <div class="layer-btn"><input type="button" class="layer-commit" value="Join"></div>
+      </div>
+    </div>
+
+    <script src="js/socket.io.js"></script>
+    <script src="js/jquery.min.js"></script>
 
     <script>
       $(document).ready(function () {
-        const socket = io(),
+        var socket = io(),
               $msg = $('#msg'),
               $send = $('#send'),
-              $messages = $('#messages')
-        // 发送消息
-        $send.click(function(){
-          socket.emit('chat message', $msg.val());
-          $msg.val('');
-          return false;
-        });
-        // 接收到广播消息
-        socket.on('getMsg', msg => {
-          $messages.append(`<li>${msg}</li>`)
-        })
+              $messages = $('#messages'),
+              $inputName = $('.inputName'),
+              $body = $('body'),
+              nickName,
+              $nickName = $('.nickName'),
+              $myName = $('.myName')
+
+        function socketIo() {
+          $send.click(function(){
+            socket.emit('chat message', {
+              name: nickName,
+              msg: $msg.val()
+            })
+            $msg.val('');
+            return false;
+          });
+
+
+          // 接收到广播消息
+          socket.on('getMsg', returnMsg => {
+            $messages.append(`<li>${returnMsg.name}说: ${returnMsg.msg}</li>`)
+          })
+
+          socket.on('login', name => {
+            if (nickName != name) {
+              showNotice(name)
+            }
+          })
+          socket.emit('login', nickName)
+          $myName.text(nickName)
+        }
+
+        // 带参数以及回调
+
+        // socket.on('setName', (name, fn) => {
+        //   console.log(name)
+        //   fn('1', 2)
+        // })
+
+        function showNotice(name) {
+          Notification.requestPermission(function (perm) {
+            if (perm == "granted") {
+              var notification = new Notification("上线提醒", {
+                dir: "auto",
+                lang: "utf-8",
+                tag: "testTag",
+                icon: "img/icon.png",
+                body: `${name}上线了`,
+                renotify: true
+              });
+            }
+          })
+        }
+
+
+        !function () {
+          nickName = localStorage.getItem("nickName")
+          if (!nickName) {
+            $inputName.show()
+          } else {
+            socketIo ()
+          }
+
+          $body.on('click', '.layer-commit', function(){
+            var _val = $nickName.val()
+            if (!!$nickName) {
+              localStorage.setItem('nickName', _val)
+              nickName = _val
+              $inputName.hide()
+              socketIo()
+            }
+          }).on('keydown', e => {
+            if (e.keyCode == 13) {
+              $send.trigger('click')
+            }
+          })
+        }()
+
+
       });
     </script>
   </body>
