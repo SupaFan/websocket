@@ -35,16 +35,18 @@
     <script>
       $(document).ready(function () {
         var socket = io(),
-              $msg = $('#msg'),
-              $send = $('#send'),
-              $messages = $('#messages'),
-              $inputName = $('.inputName'),
-              $body = $('body'),
-              nickName,
-              $nickName = $('.nickName'),
-              $myName = $('.myName')
+            nickName,
+            $msg = $('#msg'),
+            $send = $('#send'),
+            $messages = $('#messages'),
+            $inputName = $('.inputName'),
+            $body = $('body'),
+            $nickName = $('.nickName'),
+            $myName = $('.myName')
 
         function socketIo() {
+
+          // 发送消息
           $send.click(function(){
             socket.emit('chat message', {
               name: nickName,
@@ -60,22 +62,18 @@
             $messages.append(`<li>${returnMsg.name}说: ${returnMsg.msg}</li>`)
           })
 
+          // 登录广播通知
           socket.on('login', name => {
             if (nickName != name) {
               showNotice(name)
             }
           })
+          // 登录
           socket.emit('login', nickName)
           $myName.text(nickName)
         }
 
-        // 带参数以及回调
-
-        // socket.on('setName', (name, fn) => {
-        //   console.log(name)
-        //   fn('1', 2)
-        // })
-
+        // 桌面通知
         function showNotice(name) {
           Notification.requestPermission(function (perm) {
             if (perm == "granted") {
@@ -91,7 +89,7 @@
           })
         }
 
-
+        // 输入昵称逻辑
         !function () {
           nickName = localStorage.getItem("nickName")
           if (!nickName) {
@@ -99,7 +97,7 @@
           } else {
             socketIo ()
           }
-
+          // 点击发送事件以及回车事件监听
           $body.on('click', '.layer-commit', function(){
             var _val = $nickName.val()
             if (!!$nickName) {

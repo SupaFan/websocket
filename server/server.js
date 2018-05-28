@@ -25,11 +25,6 @@ io.on('connection', (socket) => {
     console.log('================断开连接================');
   })
 
-  // socket.emit('setName', 'jfan', (data1, data2) => {
-  //   console.log(data1)
-  //   console.log(data2)
-  // })
-
 })
 io.sockets.on('connection', socket => {
   socket.on('login', name => {
