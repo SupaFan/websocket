@@ -21,11 +21,12 @@ io.on('connection', (socket) => {
     io.emit(`getMsg`, msg)
   })
 
-  socket.on('disconnect', function(){
+  socket.on('disconnect', () => {
     console.log('================断开连接================');
   })
 
 })
+// 上线广播通知
 io.sockets.on('connection', socket => {
   socket.on('login', name => {
     console.log(name)
@@ -36,6 +37,7 @@ io.sockets.on('connection', socket => {
     // io.sockets.emit('userList', names)
   })
 })
+
 
 http.listen(3000, function(){
   console.log('server begin...')
