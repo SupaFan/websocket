@@ -9,7 +9,7 @@
   * 下线通知
   
   <p align="center">
-    <img src="https://github.com/SupaFan/websocket/blob/master/static/img/private.png?raw=true" width=400>
+    <img src="https://github.com/SupaFan/websocket/blob/master/static/img/private.png?raw=true" width=350>
   </p>
  
 #### server
