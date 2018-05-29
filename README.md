@@ -8,6 +8,10 @@
   * 上线通知
   * 下线通知
   
+  <p align="center">
+    <img src="https://github.com/SupaFan/websocket/blob/master/static/img/private.png?raw=true">
+  </p>
+ 
 #### server
 
 ```
