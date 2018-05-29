@@ -30,6 +30,13 @@
       </div>
     </div>
 
+    <div class="userList-container">
+      <h3>在线列表</h3>
+      <ul class="userList">
+        <li></li>
+      </ul>
+    </div>
+
     <script src="js/socket.io.js"></script>
     <script src="js/jquery.min.js"></script>
     <script src="js/toastr.min.js"></script>
@@ -48,9 +55,16 @@
             $inputName = $('.inputName'),
             $body = $('body'),
             $nickName = $('.nickName'),
-            $myName = $('.myName')
+            $myName = $('.myName'),
+            $userList = $('.userList');
+
 
         function socketIo() {
+
+          $myName.text(nickName)
+
+          // 登录
+          socket.emit('login', nickName)
 
           // 发送消息
           $send.click(function(){
@@ -58,7 +72,7 @@
               name: nickName,
               msg: $msg.val()
             })
-            $msg.val('');
+            $msg.val('').focus();
             return false;
           });
 
@@ -70,26 +84,31 @@
 
           // 登录广播通知
           socket.on('login', name => {
-            if (nickName != name) {
-              toastr.success(`${name}上线了~`, '上线提醒')
-              showNotice(name)
-            }
+            toastr.success(`${name}上线了~`, '上线提醒')
+            showNotice(name, '上线')
           })
-
 
           // 下线广播通知
-          socket.on('loginOut',  () => {
+          socket.on('loginOut', name => {
             toastr.info(`${name}下线了`)
+            showNotice(name, '下线')
+          })
+
+          // 在线用户列表
+          socket.on('userList', userList => {
+            const _arr  = []
+            userList.forEach(item => {
+              _arr.push(`<li data-id="${item.id}">${item.name}</li>`)
+            })
+            $userList.html(_arr.join(''))
+            console.log(userList)
           })
 
 
-          // 登录
-          socket.emit('login', nickName)
-          $myName.text(nickName)
         }
 
         // 桌面通知
-        function showNotice(name) {
+        function showNotice(name, type) {
           Notification.requestPermission(function (perm) {
             if (perm == "granted") {
               var notification = new Notification("上线提醒", {
@@ -97,7 +116,7 @@
                 lang: "utf-8",
                 tag: "testTag",
                 icon: "img/icon.png",
-                body: `${name}上线了`,
+                body: `${name}${type}了`,
                 renotify: true
               });
             }

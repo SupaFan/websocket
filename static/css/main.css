@@ -1,9 +1,9 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font: 13px Helvetica, Arial; }
-.form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-.form input { border: 0; padding: 10px; width: calc(90% - 60px); margin-right: .5%; }
-.form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
-.myName {display: inline-block; color: #fff;width: 60px; text-align: center}
+.form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; display: flex }
+.form input { border: 0; padding: 10px;  margin-right: .5%;  flex: 10}
+.form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px;flex: 1 }
+.form .myName {display: inline-block; color: #fff;text-align: center; flex: 1; line-height: 40px;padding: 0 10px;}
 #messages { list-style-type: none; margin: 0; padding: 0; }
 #messages li { padding: 5px 10px; }
 #messages li:nth-child(odd) { background: #eee; }
@@ -13,9 +13,13 @@ body { font: 13px Helvetica, Arial; }
 .msg-con{padding: 30px; word-break: break-all;}
 .msg-con>input {border-radius: 4px; border:none;border:1px solid #d8d8d8;  padding: 8px 20px; text-align: center}
 .msg-con>input:focus {outline: none}
-.layer-close{display: none; position: absolute; right: 10px; top: 0; font-size: 32px; color: #d02f30; height: 30px; line-height: 30px; cursor: pointer;}
 .msg-layer>h5{font-size:18px; line-height:38px; border-bottom:1px solid #ccc;}
 .layer-btn>input{width:100px; height:36px; line-height:36px; text-align: center; color:#fff; font-size: 14px; border-radius: 5px; cursor: pointer; border:none; outline: none;}
 .layer-cancel{background:#ccc9c9;}
 .layer-commit{background:#50bce0; }
 .msy-alert{position: fixed; top: 50%; left: 50%; min-width: 260px; max-width: 500px; padding: 10px; text-align: center; line-height: 20px; font-size: 14px; color: #9f3e42; z-index: 99999; background: #fff; border:1px solid #bfbfbf; box-shadow:0 0 7px 0 #b5b3b3; -webkit-box-shadow:0 0 7px 0 #b5b3b3; -moz-box-shadow:0 0 7px 0 #b5b3b3; -ms-box-shadow:0 0 7px 0 #b5b3b3; -o-box-shadow:0 0 7px 0 #b5b3b3;}
+
+
+.userList-container {position: fixed; right:0; border-radius: 4px; background: rgba(255, 255, 255, .5); top:50%; transform: translateY(-50%); width: 100px; height: 300px; overflow-x: hidden; overflow-y: auto}
+.userList-container .userList li {list-style: none;background: #f8f8f8; line-height: 24px;text-indent: 1em}
+.userList-container h3 {font-size: 16px; font-weight: 400; text-align: center; background: rgba(0, 0, 0, .5); color: #fff; line-height: 32px;;}

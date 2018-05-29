@@ -3,7 +3,8 @@ var app   = express()
 var http  = require('http').Server(app)
 var io    = require('socket.io')(http)
 
-var names = []
+var userList = []
+
 
 app.use(express.static('../static'))
 app.get('/',function(req,res){
@@ -23,20 +24,38 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('================断开连接================');
+    userList.forEach((item, index, arr) => {
+      if (item.id === socket.id) {
+        arr.splice(index, 1)
+        updataUserList()
+        socket.broadcast.emit('loginOut', item.name)
+      }
+    })
   })
 
 })
 // 上线广播通知
 io.sockets.on('connection', socket => {
   socket.on('login', name => {
-    console.log(name)
-    io.sockets.emit('login', name)
-    if (names.indexOf(name) < 0) {
-      names.push(name)
+    socket.broadcast.emit('login', name)
+    if (userList.indexOf(name) < 0) {
+      userList.push({
+        name: name,
+        id: socket.id
+      })
     }
-    // io.sockets.emit('userList', names)
+    updataUserList()
   })
 })
+
+// 更新user列表
+let timer
+function updataUserList() {
+  clearTimeout(timer)
+  timer = setTimeout(() => {
+    io.sockets.emit('userList', userList)
+  }, 300)
+}
 
 
 http.listen(3000, function(){
