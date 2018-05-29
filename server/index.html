@@ -18,7 +18,6 @@
       <input id="msg"  autocomplete="off" /><button id="send">Send</button>
     </div>
 
-
     <div class="inputName" style="display: none">
       <div class="msg-layer-bg"></div>
       <div class="msg-layer showAlert">
@@ -30,10 +29,20 @@
       </div>
     </div>
 
+    <div class="privateDialog" style="display: none">
+        <div class="msg-layer-bg"></div>
+        <div class="msg-layer showAlert">
+          <h5 class="private-title">与大地私聊</h5>
+          <div class="msg-con">
+            <textarea placeholder="请输入对话内容" class="privateMsg"></textarea>
+          </div>
+          <div class="layer-btn"><input type="button" class="privateMsg-commit" value="发送"></div>
+        </div>
+      </div>
+
     <div class="userList-container">
       <h3>在线列表</h3>
       <ul class="userList">
-        <li></li>
       </ul>
     </div>
 
@@ -47,9 +56,27 @@
           "closeButton": true
         }
 
+        var urlParams = function () {
+          var url = location.search // 获取url中"?"符后的字串
+          url = url.replace('&amp;', '&')
+          var param = {}
+          if (url.indexOf('?') !== -1) {
+            var str = url.substr(1)
+            var strs = str.split('&')
+            for (var i = 0; i < strs.length; i++) {
+              param[strs[i].split('=')[0]] = (strs[i].split('=')[1])
+            }
+          }
+          return param
+        }
+        var params = urlParams()
+
         var socket = io(),
-            nickName,
+            nickName,privateId,selfId,privateName,
+            $privateDialog = $('.privateDialog'),
             $msg = $('#msg'),
+            $privateMsg = $('.privateMsg'),
+            $privateTitle = $('.private-title')
             $send = $('#send'),
             $messages = $('#messages'),
             $inputName = $('.inputName'),
@@ -57,10 +84,11 @@
             $nickName = $('.nickName'),
             $myName = $('.myName'),
             $userList = $('.userList');
-
+            $listContainer = $('.userList-container'),
+            $privateMsgCommit = $('.privateMsg-commit')
+            dialogShow = false
 
         function socketIo() {
-
           $myName.text(nickName)
 
           // 登录
@@ -76,16 +104,32 @@
             return false;
           });
 
-
           // 接收到广播消息
           socket.on('getMsg', returnMsg => {
             $messages.append(`<li>${returnMsg.name}说: ${returnMsg.msg}</li>`)
           })
 
+          // 接受私聊消息
+          socket.on('getPrivateMsg', returnMsg => {
+            $messages.append(`<li>${returnMsg.name}对您说: ${returnMsg.msg}</li>`)
+          })
+
+          // 接受私聊消息
+          socket.on('selfMsg', returnMsg => {
+            $messages.append(`<li>我对${privateName}说: ${returnMsg.msg}</li>`)
+          })
+
+
           // 登录广播通知
           socket.on('login', name => {
             toastr.success(`${name}上线了~`, '上线提醒')
             showNotice(name, '上线')
+          })
+
+
+          // 获取自己的id
+          socket.once('getSelfId', id => {
+            selfId = id
           })
 
           // 下线广播通知
@@ -96,15 +140,12 @@
 
           // 在线用户列表
           socket.on('userList', userList => {
-            const _arr  = []
+            var _arr  = []
             userList.forEach(item => {
               _arr.push(`<li data-id="${item.id}">${item.name}</li>`)
             })
             $userList.html(_arr.join(''))
-            console.log(userList)
           })
-
-
         }
 
         // 桌面通知
@@ -140,13 +181,48 @@
               $inputName.hide()
               socketIo()
             }
-          }).on('keydown', e => {
+          })
+          // 私聊发送
+          .on('click', '.privateMsg-commit', function(){
+            socket.emit('privateMsg', {
+              name: nickName,
+              sendId: privateId,
+              selfId: selfId,
+              privateName: privateName,
+              msg: $privateMsg.val()
+            })
+            $privateMsg.val('')
+            $privateDialog.hide()
+            dialogShow = false
+          })
+          // 键盘回车发送
+          .on('keydown', e => {
             if (e.keyCode == 13) {
-              $send.trigger('click')
+              if (dialogShow) {
+                $privateMsgCommit.trigger('click')
+              } else {
+                $send.trigger('click')
+              }
+
             }
           })
         }()
 
+        $userList.on('click', 'li', function () {
+          var _this = $(this)
+          var _id = _this.data('id')
+          var _name = _this.text()
+          if (_name == nickName) {
+            toastr.error('请不要自嗨~')
+          } else {
+            $privateTitle.text(`与${_name}私聊`)
+            dialogShow = true
+            privateId = _id
+            privateName = _name
+            $privateDialog.show()
+            $privateMsg.focus()
+          }
+        })
 
       });
     </script>
